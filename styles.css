@@ -1,0 +1,55 @@
+/* 减少页面边距 */
+.main .block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    max-width: none;
+}
+
+/* 标题居中 */
+h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+/* 信息框居中 */
+.stAlert {
+    text-align: center;
+    margin: 10px auto;
+    width: fit-content; 
+}
+
+/* 搜索框容器靠右对齐 */
+.search-container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px 0;
+}
+
+/* 搜索框样式 */
+.search-container .stTextInput {
+    width: 300px;
+}
+
+/* 优化表格显示 */
+.stTable {
+    font-size: 14px;
+}
+
+/* 优化搜索框布局 */
+.stTextInput > div > div > input {
+    font-size: 14px;
+}
+
+/* 搜索框标签样式 */
+.stTextInput > label {
+    font-size: 14px;
+}
+
+/* 成功/警告信息框居中 */
+.stSuccess, .stWarning {
+    text-align: center;
+    margin: 10px auto;
+    width: fit-content;
+}

@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 from dbutils.pooled_db import PooledDB  
 import pymysql
 import yaml
@@ -8,6 +9,7 @@ import requests
 import json
 import os
 from datetime import datetime, timedelta
+import time
 
 st.set_page_config(
     page_title="AH股票数据分析",
@@ -15,6 +17,9 @@ st.set_page_config(
     layout="wide",  
     initial_sidebar_state="collapsed"  
 )
+
+# 每隔 10 秒自动刷新页面
+count = st_autorefresh(interval=10 * 1000, key="auto_refresh")
 
 st.title('AH股票数据分析')
 
@@ -158,13 +163,14 @@ if stock_data:
     refresh_status = f"🕐 **现在时间**: {current_time.strftime('%Y-%m-%d %H:%M:%S')}"
     refresh_status += f" | 🔄 **数据时间**: {data_time.strftime('%Y-%m-%d %H:%M:%S')}"
     refresh_status += f" | ⏱️ **数据年龄**: {int(time_diff)}秒"
+    refresh_status += f" | 🔄 **页面刷新次数**: {count}"
     
     if time_diff < 15:  # 15秒内的数据认为是新鲜的
         refresh_status += f" | ✅ **状态**: 数据新鲜"
     else:
         refresh_status += f" | ⚠️ **状态**: 数据较旧"
 else:
-    refresh_status = f"🕐 **现在时间**: {current_time.strftime('%Y-%m-%d %H:%M:%S')} | ❌ **状态**: 无数据"
+    refresh_status = f"🕐 **现在时间**: {current_time.strftime('%Y-%m-%d %H:%M:%S')} | 🔄 **页面刷新次数**: {count} | ❌ **状态**: 无数据"
 
 st.info(refresh_status)
 
@@ -183,7 +189,7 @@ if stock_data and stock_data.get('stock_pairs'):
         st.markdown('<div class="search-container">', unsafe_allow_html=True)
         col1, col2 = st.columns([3, 1])
         with col2:
-            search_term = st.text_input('', placeholder="输入关键词搜索...", label_visibility="collapsed")
+            search_term = st.text_input('', placeholder="🔍 输入关键词搜索...", label_visibility="collapsed")
         st.markdown('</div>', unsafe_allow_html=True)
         
         # 如果有搜索条件，过滤数据
@@ -211,12 +217,3 @@ if stock_data and stock_data.get('stock_pairs'):
         st.warning('数据处理失败')
 else:
     st.warning('暂无股票数据，请确保数据获取服务正在运行')
-
-# 添加自动刷新
-st.markdown("""
-<script>
-setTimeout(function(){
-    window.location.reload();
-}, 5000);
-</script>
-""", unsafe_allow_html=True)

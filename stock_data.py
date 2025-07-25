@@ -85,18 +85,28 @@ class StockDataFetcher:
             return None
 
     def get_tencent_hk_price(self, hk_codes):
-        """从腾讯财经获取港股价格"""
+        """从腾讯财经获取港股价格（使用实时API）"""
         if not hk_codes:
             return {}
         
-        # 腾讯API需要的格式：hk00700
-        codes_str = ','.join(hk_codes)
+        # 转换为腾讯实时API需要的格式：r_hk00700
+        real_time_codes = []
+        for code in hk_codes:
+            if code.startswith('hk'):
+                # 将 hk00700 转换为 r_hk00700
+                real_time_codes.append(f"r_{code}")
+            else:
+                real_time_codes.append(f"r_hk{code.zfill(5)}")
+        
+        codes_str = ','.join(real_time_codes)
         url = f"http://qt.gtimg.cn/q={codes_str}"
         
         headers = {
             'User-Agent': self.get_random_user_agent(),
             'Accept': '*/*',
             'Referer': 'http://stockapp.finance.qq.com',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
         }
         
         try:
@@ -109,15 +119,15 @@ class StockDataFetcher:
             lines = response.text.strip().split('\n')
             
             for line in lines:
-                if '~' in line and line.startswith('v_'):
-                    # 解析腾讯API返回格式：v_hk00700="100~腾讯控股~00700~557.000~..."
+                if '~' in line and line.startswith('v_r_'):
+                    # 解析腾讯实时API返回格式：v_r_hk00700="100~腾讯控股~00700~557.000~..."
                     parts = line.split('~')
                     if len(parts) >= 35:
                         try:
-                            # 提取股票代码
-                            code_part = line.split('=')[0].replace('v_', '')
+                            # 提取股票代码，去掉 v_r_ 前缀
+                            code_part = line.split('=')[0].replace('v_r_', '')
                             
-                            # 腾讯港股API字段映射（根据实际调试结果）
+                            # 腾讯港股实时API字段映射
                             name = parts[1]                    # 字段1: 股票名称
                             current_price = float(parts[3]) if parts[3] else 0    # 字段3: 当前价格
                             yesterday_close = float(parts[4]) if parts[4] else 0  # 字段4: 昨收价
@@ -126,21 +136,21 @@ class StockDataFetcher:
                             today_low = float(parts[34]) if len(parts) > 34 and parts[34] else 0   # 字段34: 最低价
                             volume = int(float(parts[6])) if parts[6] else 0      # 字段6: 成交量
                             
-                            # 字段30: 时间字段，格式为 "2025/07/24 16:08:08"
+                            # 字段30: 时间字段，格式为 "2025/01/24 16:08:08"
                             datetime_str = parts[30] if len(parts) > 30 and parts[30] else ''
                             
-                            # 解析时间格式：2025/07/24 16:08:08
+                            # 解析时间格式：2025/01/24 16:08:08
                             if datetime_str and ' ' in datetime_str:
                                 try:
                                     date_part, time_part = datetime_str.split(' ')
-                                    # 转换日期格式：2025/07/24 -> 2025-07-24
+                                    # 转换日期格式：2025/01/24 -> 2025-01-24
                                     if '/' in date_part:
                                         date_components = date_part.split('/')
                                         if len(date_components) == 3:
                                             date_part = f"{date_components[0]}-{date_components[1].zfill(2)}-{date_components[2].zfill(2)}"
                                     
-                                    # 时间部分已经是 HH:MM:SS 格式，直接使用
-                                    if ':' not in time_part:
+                                    # 验证时间格式是否正确
+                                    if ':' not in time_part or len(time_part.split(':')) != 3:
                                         # 如果时间格式异常，使用当前时间
                                         from datetime import datetime
                                         time_part = datetime.now().strftime('%H:%M:%S')
@@ -181,12 +191,12 @@ class StockDataFetcher:
                                 results[code_part]['change_percent'] = 0
                                 
                         except (ValueError, IndexError) as e:
-                            print(f"解析腾讯港股数据失败: {e}, 数据: {line}")
+                            print(f"解析腾讯港股实时数据失败: {e}, 数据: {line}")
                             continue
             
             return results
         except Exception as e:
-            print(f"获取腾讯港股数据失败: {e}")
+            print(f"获取腾讯港股实时数据失败: {e}")
             return {}
 
     def get_mixed_stock_price(self, stock_codes):

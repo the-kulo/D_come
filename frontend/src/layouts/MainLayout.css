@@ -8,7 +8,7 @@
 }
 
 .layout-header {
-  height: 48px;
+  height: 66px;
   background-color: #0078d4;
   color: white;
   display: flex;
@@ -20,8 +20,9 @@
 
 .layout-header-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 36px;
   font-weight: 600;
+  font-style: italic;
   letter-spacing: -0.01em;
 }
 
@@ -31,66 +32,102 @@
   overflow: hidden;
 }
 
+/* 左侧导航栏 - 表格样式 */
 .layout-sidebar {
   width: 280px;
-  background-color: #f3f2f1;
-  border-right: 1px solid #edebe9;
-  padding: 16px 0;
+  background-color: white;
+  border-right: 1px solid #d1d1d1;
+  padding: 0;
   overflow-y: auto;
 }
 
+/* 导航列表容器 */
 .sidebar-nav-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  border: 1px solid #d1d1d1;
+  border-bottom: none;
 }
 
+/* 导航列表项 - 表格行样式 */
 .sidebar-nav-item {
   margin: 0;
+  border-bottom: 1px solid #d1d1d1;
 }
 
+/* 导航链接 - 占满整个宽度，表格单元格样式 */
 .sidebar-nav-link {
   display: block;
   color: #323130;
   text-decoration: none;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 400;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 500;
   line-height: 20px;
-  border-radius: 2px;
-  margin: 2px 8px;
-  transition: all 0.1s ease-in-out;
+  margin: 0;
+  transition: all 0.2s ease-in-out;
   position: relative;
+  background-color: white;
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* 鼠标悬停高亮效果 - 表格行高亮，确保无下划线 */
 .sidebar-nav-link:hover {
-  background-color: #f3f2f1;
-  color: #106ebe;
+  background-color: #f0f8ff;
+  color: #0078d4;
+  text-decoration: none;
 }
 
+/* 点击时的效果 - 确保无下划线 */
 .sidebar-nav-link:active {
-  background-color: #edebe9;
+  background-color: #e6f3ff;
+  text-decoration: none;
 }
 
+/* 焦点状态 - 确保无下划线 */
 .sidebar-nav-link:focus {
   outline: 2px solid #0078d4;
   outline-offset: -2px;
+  background-color: #f0f8ff;
+  text-decoration: none;
 }
 
+/* 当前激活的导航链接 - 表格选中行样式 */
 .sidebar-nav-link.active {
-  background-color: #deecf9;
-  color: #106ebe;
+  background-color: #0078d4;
+  color: white;
   font-weight: 600;
+  text-decoration: none;
 }
 
+/* 激活链接悬停效果 - 确保无下划线 */
+.sidebar-nav-link.active:hover {
+  background-color: #106ebe;
+  text-decoration: none;
+}
+
+/* 激活链接的左侧指示条 */
 .sidebar-nav-link.active::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
-  background-color: #0078d4;
+  width: 4px;
+  background-color: #005a9e;
+}
+
+/* 强制移除所有链接状态的下划线 */
+.sidebar-nav-link,
+.sidebar-nav-link:link,
+.sidebar-nav-link:visited,
+.sidebar-nav-link:hover,
+.sidebar-nav-link:active,
+.sidebar-nav-link:focus {
+  text-decoration: none !important;
 }
 
 .layout-content-area {
@@ -132,8 +169,8 @@
   }
   
   .sidebar-nav-link {
-    padding: 10px 16px;
-    font-size: 13px;
+    padding: 12px 16px;
+    font-size: 14px;
   }
 }
 

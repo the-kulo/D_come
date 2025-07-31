@@ -1,10 +1,15 @@
 package main
 
 import (
-	"D_come/internal/application"
 	"D_come/internal/config"
+	"D_come/internal/infrastructure/grpc"
 	"D_come/internal/infrastructure/persistence"
 	"fmt"
+	"log"
+	"net"
+
+	googlegrpc "google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -20,21 +25,25 @@ func main() {
 
 	stockRepo := persistence.NewStockRepository(db.DB)
 
-	stockPairs, err := stockRepo.GetAll()
+	grpcServer := googlegrpc.NewServer()
+
+	stockServer := grpc.NewStockServer(stockRepo)
+	grpc.RegisterStockServiceServer(grpcServer, stockServer)
+
+	reflection.Register(grpcServer)
+
+	port := cfg.Server.Port
+	if port == 0 {
+		port = 50051
+	}
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		panic(err)
+		log.Fatalf("无法监听端口: %v", err)
 	}
 
-	for _, stock := range stockPairs {
-		input := application.CrawlerInput{
-			StockName:     stock.StockName,
-			OriginalACode: stock.AStockCode,
-			OriginalHCode: stock.HStockCode,
-		}
+	log.Printf("gRPC服务器正在监听端口 %d", port)
 
-		input.Normalize()
-
-		fmt.Printf("股票名称: %s, 转换前 A 股: %s, 转换后 A 股: %s, 转换前 H 股: %s, 转换后 H 股: %s\n",
-			input.StockName, stock.AStockCode, input.OriginalACode, stock.HStockCode, input.OriginalHCode)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("服务器运行失败: %v", err)
 	}
 }
